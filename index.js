@@ -21,7 +21,7 @@ app.post("/user", (req, res) => {
     const hash = bcrypt.hashSync(req.body.password, salt);
     console.log(hash);
     con.query("select * from user where mobile_no   = ?", [req.body.mobile_no], (err, result) => {
-      
+      console.log(result);
       if (err) throw err;
       if (result[0] == null) {
        
