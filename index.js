@@ -4,6 +4,7 @@ const app = express();
 const port = 6000;
 const con = require('./Database/db')
 var jwt = require('jsonwebtoken');
+``
 const multer = require('multer')
 const cors = require('cors');
 app.use(cors());
@@ -32,11 +33,98 @@ app.post("/user", (req, res) => {
               }
             })
           } else {
-            res.send("mobile_no is aLREADY EXIST");
+            res.send("MOBILE_NO IS  ALREADY EXIST");
           }
         })
     })
+    
+ app.post("/user-login", (req, res) => {
+  
+      con.query("select * from user where mobile_no = ?", [req.body.mobile_no], (err, result) => {
+        if (err) throw err;
+        if (result[0] != null) {
+          const match = bcrypt.compareSync(req.body.password, result[0].password)
+          console.log(match);
+          if (match) {
+            jwt.sign({ mobile_no: req.body.mobile_no}, process.env.ACCESS_TOKEN_SECRET, (err, token) => {
+              if (err) throw err;
+              else
+                res.status(200).json({
+                  status: true,
+              mobile_no: result[0].mobile_no,
+                  token,
+                });
+            }
+            )}else{
+              res.send("password not matched")
 
+            }
+          } else {
+            res.send("mobile_no is not exist");
+          }
+        
+                
+        }
+              
+      )
+          })
+        
+    
+  
+
+
+// register api
+app.post("/register", (req, res) => {
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(req.body.password, salt);
+  
+  
+  con.query("select * from login where user_name = ?", [req.body.user_name], (err, result) => {
+    if (err) throw err;
+    if (result[0] == null) {
+      con.query("INSERT INTO `login`(`user_name`, `password`,`admin_name`,`status`) VALUES (?,?,?,?)", [req.body.user_name, hash,req.body.admin_name,"y"], (err, result) => {
+        if (err) throw err;
+        else {
+          res.status(200).send(true)
+        }
+      })
+    } else {
+      res.send("Username is already exist");
+    }
+  })
+})
+
+    // login api
+   
+    
+    app.post("/login", (req, res) => {
+      con.query("select * from login where user_name = ?", [req.body.user_name], (err, result) => {
+        if (err) throw err;
+        if (result[0] != null) {
+          const match = bcrypt.compareSync(req.body.password, result[0].password)
+          console.log(match);
+          if (match) {
+            jwt.sign({ user_name: req.body.user_name}, process.env.ACCESS_TOKEN_SECRET, (err, token) => {
+              if (err) throw err;
+              else
+                res.status(200).json({
+                  status: true,
+                admin_name: result[0].admin_name,
+                  token,
+                });
+            }
+            )};
+          } else {
+            res.send("user_name is not exist");
+          }
+        
+                
+        }
+              
+      )
+          })
+        
+    
   
   
   
@@ -46,6 +134,6 @@ app.post("/user", (req, res) => {
 
 
 app.listen(port, () => {
-    console.log("Database Connected")
+   
     console.log('port : ' + port);
   })

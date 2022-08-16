@@ -8,6 +8,6 @@ const con = mysql.createPool({
 })
 con.getConnection((err) => {
     if (err) throw err;
-    // console.log("Database Connected");
+    console.log("Database Connected");
 })
 module.exports = con;
