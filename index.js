@@ -4,7 +4,12 @@ const app = express();
 const port = 6000;
 const con = require('./Database/db')
 var jwt = require('jsonwebtoken');
-``
+
+var http=require('http')
+http.createServer((req,res)=>{
+  res.write("hello server");
+  res.end();
+}).listen(4100);
 const multer = require('multer')
 const cors = require('cors');
 app.use(cors());
@@ -95,7 +100,16 @@ app.post("/register", (req, res) => {
 })
 
     // login api
-   
+    app.get("/get-business",(req,res)=>{
+
+      con.query("SELECT * FROM `business_category`", (error, result) => {
+        if (result) {
+          res.status(200).send(result);
+        } else {
+          res.sendStatus(403);
+        }
+      });
+    })
     
     app.post("/login", (req, res) => {
       con.query("select * from login where user_name = ?", [req.body.user_name], (err, result) => {
